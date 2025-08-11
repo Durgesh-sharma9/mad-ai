@@ -1,10 +1,16 @@
 import React, { useState } from "react";
 import { MoonIcon, SunIcon } from "@heroicons/react/24/solid";
+import { Link } from "react-router-dom";
 
 export default function Navbar({ darkMode, setDarkMode }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const links = ["Home", "Projects", "About", "Contact"];
+  const links = [
+    { name: "Home", to: "/" },
+    { name: "Projects", to: "/projects" },
+    { name: "About", to: "/about" },
+    { name: "Contact", to: "/contact" },
+  ];
 
   return (
     <>
@@ -20,21 +26,22 @@ export default function Navbar({ darkMode, setDarkMode }) {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <span className="text-2xl font-bold drop-shadow-lg hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition">
+              <Link to="/" className="text-2xl font-bold drop-shadow-lg hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition">
                 NextGen<span className="text-yellow-300">Sites</span>
-              </span>
+              </Link>
             </div>
 
             {/* Desktop Links */}
             <div className="hidden md:flex space-x-6">
-              {links.map((link) => (
-                <a
-                  key={link}
-                  href={`#${link.toLowerCase()}`}
+              {links.map(({ name, to }) => (
+                <Link
+                  key={name}
+                  to={to}
                   className="px-3 py-1 rounded-md hover:text-yellow-300 hover:shadow-md hover:shadow-yellow-200/50 transition duration-300"
+                  onClick={() => setMenuOpen(false)}
                 >
-                  {link}
-                </a>
+                  {name}
+                </Link>
               ))}
             </div>
 
@@ -96,15 +103,15 @@ export default function Navbar({ darkMode, setDarkMode }) {
           </button>
         </div>
         <nav className="flex flex-col space-y-6 px-6 mt-10 text-xl font-semibold">
-          {links.map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
+          {links.map(({ name, to }) => (
+            <Link
+              key={name}
+              to={to}
               className="hover:text-yellow-300"
               onClick={() => setMenuOpen(false)}
             >
-              {link}
-            </a>
+              {name}
+            </Link>
           ))}
         </nav>
       </div>
@@ -113,9 +120,7 @@ export default function Navbar({ darkMode, setDarkMode }) {
       {menuOpen && (
         <div
           className={`fixed inset-0 z-50 backdrop-blur-md ${
-            darkMode
-              ? "bg-black bg-opacity-20"
-              : "bg-white bg-opacity-20"
+            darkMode ? "bg-black bg-opacity-20" : "bg-white bg-opacity-20"
           }`}
           onClick={() => setMenuOpen(false)}
           aria-hidden="true"

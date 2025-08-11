@@ -47,17 +47,6 @@ const projects = [
     ],
     link: "#",
   },
-   {
-    id: 5,
-    title: "Project Four",
-    description:
-      "This is a detailed description for Project Four. It covers key aspects and goals.",
-    images: [
-      "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80",
-    ],
-    link: "#",
-  },
 ];
 
 export default function Home({ darkMode }) {
@@ -71,7 +60,7 @@ export default function Home({ darkMode }) {
 
   const modalScrollRef = useRef(null);
 
-  // Cycle project images every 3 seconds
+  // Cycle project images every 3 seconds on cards
   useEffect(() => {
     const interval = setInterval(() => {
       setCardImageIndices((prev) => {
@@ -86,33 +75,28 @@ export default function Home({ darkMode }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto scroll modal images left <-> right
+  // Smooth continuous left-right auto scroll for modal images without scrollbar
   useEffect(() => {
     if (!selectedProject) return;
-
     const scrollContainer = modalScrollRef.current;
     if (!scrollContainer) return;
 
-    let scrollAmount = 0;
+    let scrollPos = 0;
     let direction = 1;
-    const maxScrollLeft =
-      scrollContainer.scrollWidth - scrollContainer.clientWidth;
-    const step = 0.3;
+    const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+    const speed = 0.5; // pixels per frame
 
     let animationFrameId;
 
-    function scroll() {
-      scrollAmount += step * direction;
-      if (scrollAmount >= maxScrollLeft) {
-        direction = -1;
-      } else if (scrollAmount <= 0) {
-        direction = 1;
-      }
-      scrollContainer.scrollLeft = scrollAmount;
-      animationFrameId = requestAnimationFrame(scroll);
-    }
+    const smoothScroll = () => {
+      scrollPos += speed * direction;
+      if (scrollPos >= maxScroll) direction = -1;
+      else if (scrollPos <= 0) direction = 1;
+      scrollContainer.scrollLeft = scrollPos;
+      animationFrameId = requestAnimationFrame(smoothScroll);
+    };
 
-    animationFrameId = requestAnimationFrame(scroll);
+    animationFrameId = requestAnimationFrame(smoothScroll);
 
     return () => cancelAnimationFrame(animationFrameId);
   }, [selectedProject]);
@@ -122,26 +106,24 @@ export default function Home({ darkMode }) {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-500 px-6 py-16 ${
+      className={`min-h-screen transition-colors duration-500 px-6 py-16 pt-28 ${
         darkMode
           ? "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white"
           : "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white"
       }`}
     >
-      {/* Main content wrapper */}
       <div
-        className={`max-w-6xl mx-auto mt-20 ${
+        className={`max-w-6xl mx-auto ${
           selectedProject ? "blur-sm pointer-events-none" : ""
         }`}
       >
-        <h1 className="text-5xl font-bold mb-4 text-center">
+        <h1 className="text-5xl font-bold mb-4 text-center animate-fadeInDown">
           Welcome to <span className="text-yellow-400">NextGenSites</span>
         </h1>
 
-        {/* New paragraph added here */}
         <p className="mb-10 text-center max-w-3xl mx-auto text-lg opacity-80">
-          Explore our latest projects showcasing innovative designs and
-          cutting-edge technologies.
+          Explore our latest projects showcasing innovative designs and cutting-edge
+          technologies.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
@@ -149,13 +131,14 @@ export default function Home({ darkMode }) {
             <div
               key={project.id}
               onClick={() => openModal(project)}
-              className="cursor-pointer rounded-xl bg-white/20 p-4 shadow-2xl backdrop-blur-lg hover:bg-white/40 transition flex flex-col"
+              className="cursor-pointer rounded-xl bg-white/20 p-4 shadow-2xl backdrop-blur-lg hover:bg-white/40 transition transform hover:scale-105 hover:shadow-xl duration-300 flex flex-col animate-fadeInUp"
             >
               <img
                 src={project.images[cardImageIndices[project.id]]}
                 alt={project.title}
                 className="rounded-lg w-full h-48 object-cover mb-4 transition-opacity duration-1000 ease-in"
                 loading="lazy"
+                draggable={false}
               />
               <h2 className="text-2xl font-semibold mb-2">{project.title}</h2>
               <p className="text-sm line-clamp-3">{project.description}</p>
@@ -166,66 +149,104 @@ export default function Home({ darkMode }) {
 
       {/* Modal */}
       {selectedProject && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-6">
+        <>
           <div
-            className={`rounded-3xl max-w-5xl w-full max-h-[90vh] p-8 relative overflow-hidden flex flex-col gap-6 ${
-              darkMode
-                ? "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white"
-                : "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white"
-            }`}
-          >
-            {/* Close Button */}
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 z-50 text-gray-300 hover:text-red-500 text-5xl font-bold cursor-pointer"
-              aria-label="Close modal"
-            >
-              &times;
-            </button>
-
-            {/* Scrollable images */}
+            className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-md z-50"
+            onClick={closeModal}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-60 p-6">
             <div
-              ref={modalScrollRef}
-              className="flex overflow-x-auto space-x-6 rounded-lg no-scrollbar pt-10"
-              style={{
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-              }}
+              className={`rounded-3xl max-w-5xl w-full max-h-[90vh] p-8 relative overflow-hidden flex flex-col gap-6 ${
+                darkMode
+                  ? "bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white"
+                  : "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white"
+              }`}
             >
-              <style>{`
-                .no-scrollbar::-webkit-scrollbar {
-                  display: none;
-                }
-              `}</style>
-
-              {selectedProject.images.map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  alt={`${selectedProject.title} image ${i + 1}`}
-                  className="h-72 rounded-lg object-cover flex-shrink-0"
-                  loading="lazy"
-                />
-              ))}
-            </div>
-
-            {/* Details */}
-            <div className="mt-4">
-              <h2 className="text-4xl font-bold mb-4">{selectedProject.title}</h2>
-              <p className="mb-8">{selectedProject.description}</p>
-
-              <a
-                href={selectedProject.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block px-8 py-4 bg-yellow-400 text-gray-900 font-semibold rounded-lg shadow-md hover:bg-yellow-300 transition"
+              {/* Close Button */}
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 z-50 text-gray-300 hover:text-red-500 text-5xl font-bold cursor-pointer"
+                aria-label="Close modal"
               >
-                Visit Project
-              </a>
+                &times;
+              </button>
+
+              {/* Scrollable images without scrollbar and smooth animation */}
+              <div
+                ref={modalScrollRef}
+                className="flex space-x-6 rounded-lg pt-10 overflow-hidden"
+                style={{
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}
+              >
+                <style>{`
+                  div::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}</style>
+
+                {selectedProject.images.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    alt={`${selectedProject.title} image ${i + 1}`}
+                    className="h-72 rounded-lg object-cover flex-shrink-0 select-none"
+                    loading="lazy"
+                    draggable={false}
+                  />
+                ))}
+              </div>
+
+              {/* Details */}
+              <div className="mt-4">
+                <h2 className="text-4xl font-bold mb-4">{selectedProject.title}</h2>
+                <p className="mb-8">{selectedProject.description}</p>
+
+                <a
+                  href={selectedProject.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-8 py-4 bg-yellow-400 text-gray-900 font-semibold rounded-lg shadow-md hover:bg-yellow-300 transition"
+                >
+                  Visit Project
+                </a>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
+
+      {/* Tailwind Animations */}
+      <style>{`
+        @keyframes fadeInDown {
+          0% {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeInDown {
+          animation: fadeInDown 1s ease forwards;
+        }
+        @keyframes fadeInUp {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeInUp {
+          animation: fadeInUp 1s ease forwards;
+        }
+      `}</style>
     </div>
   );
 }
