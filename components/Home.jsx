@@ -47,6 +47,17 @@ const projects = [
     ],
     link: "#",
   },
+   {
+    id: 5,
+    title: "Project Four",
+    description:
+      "This is a detailed description for Project Four. It covers key aspects and goals.",
+    images: [
+      "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80",
+    ],
+    link: "#",
+  },
 ];
 
 export default function Home({ darkMode }) {
